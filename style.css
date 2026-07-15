@@ -1,0 +1,56 @@
+/* style.css */
+
+.product-card {
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 8px;
+    transition: 0.2s;
+}
+
+.product-card:hover {
+    transform: translateY(-3px);
+}
+
+.product-card img {
+    width: 100%;
+    height: 180px;
+    object-fit: contain;
+}
+
+.form-check {
+    user-select: none;
+}
+
+/* Об'єднаний та виправлений контейнер фільтрів */
+#dynamicFiltersContainer {
+    min-height: 200px;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+    padding-right: 5px;
+}
+
+/* Примусово вимикаємо будь-які переходи для акордеона */
+.accordion-collapse {
+    transition: none !important;
+}
+
+.collapsing {
+    display: none !important; 
+}
+
+.accordion-body {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+}
+
+/* 
+   ВАЖЛИВО: Sticky на картці конфліктує з max-height усередині.
+   Щоб все працювало, sticky-md-top має бути адаптивним.
+*/
+.sticky-md-top {
+    position: sticky;
+    top: 80px;
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+    z-index: 100;
+}
