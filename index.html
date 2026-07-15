@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Дропшипінг Вітрина</title>
+    <base href="./">
+    <link href="assets/bootstrap.min.css" rel="stylesheet">
+    <link href="assets/PhotoSwipe-master/src/photoswipe.css" rel="stylesheet">
+    <link href="style.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+    <!-- Шапка сайту -->
+    <nav class="navbar navbar-dark bg-dark sticky-top shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="index.html" onclick="showCatalogView(event)">DropShop</a>
+            <button class="btn btn-outline-light position-relative" onclick="openCartModal()">
+                🛒 Кошик
+                <span id="cartCount" class="badge bg-danger rounded-pill cart-badge">0</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- СЕКЦІЯ 1: ГОЛОВНИЙ КАТАЛОГ -->
+    <div class="container py-5" id="catalogView">
+        <div class="row">
+            
+            <!-- ЛІВА КОЛОНКА: ФІЛЬТРИ -->
+            <div class="col-md-3 mb-4">
+                <div class="card p-3 shadow-sm sticky-md-top" style="top: 80px; z-index: 100;">
+                    <h5 class="fw-bold text-primary mb-3">Фільтри</h5>
+                    
+                    <!-- Пошук та сортування вгорі фільтрів -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">Пошук за назвою</label>
+                        <input type="text" id="search" class="form-control form-control-sm" placeholder="Введіть текст...">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">Категорія</label>
+                        <select id="categoryFilter" class="form-select form-select-sm">
+                            <option value="all">Всі категорії</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">Сортування</label>
+                        <select id="priceSort" class="form-select form-select-sm">
+                            <option value="default">За замовчуванням</option>
+                            <option value="low">Від дешевих до дорогих</option>
+                            <option value="high">Від дорогих до дешевих</option>
+                        </select>
+                    </div>
+
+                    <!-- Фільтр за ціною -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">Ціна (грн)</label>
+                        <div class="d-flex gap-2">
+                            <input type="number" id="priceMin" class="form-control form-control-sm" placeholder="Мін">
+                            <input type="number" id="priceMax" class="form-control form-control-sm" placeholder="Макс">
+                        </div>
+                    </div>
+
+                    <!-- Динамічні фільтри з параметрів YML (заповнюються через JS) -->
+                    <div id="dynamicFiltersContainer"></div>
+
+                    <button class="btn btn-outline-danger btn-sm w-100 mt-3 fw-bold" onclick="resetAllFilters()">❌ Скинути фільтри</button>
+                </div>
+            </div>
+
+            <!-- ПРАВА КОЛОНКА: ТОВАРИ -->
+            <div class="col-md-9">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h1 class="mb-0 fw-bold text-dark fs-3">Всі товари</h1>
+                    <select id="itemsPerPageSelect" class="form-select form-select-sm w-auto" onchange="changeItemsPerPage()">
+                        <option value="8">8</option>
+                        <option value="20">20</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
+                <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4" id="productsContainer">
+                    <div class="col-12 text-center py-5">Завантаження товарів...</div>
+                </div>
+
+                <!-- Пагінація -->
+                <nav class="mt-5">
+                    <ul class="pagination justify-content-center" id="paginationContainer"></ul>
+                </nav>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- СЕКЦІЯ 2: СТОРІНКА ТОВАРУ -->
+    <div class="container py-5 d-none" id="productDetailView">
+        <button class="btn btn-outline-secondary mb-4 fw-bold" onclick="showCatalogView(event)">← Назад до каталогу</button>
+        <div class="card shadow-sm p-4 mb-4">
+            <div class="row g-4" id="productDetailContainer"></div>
+        </div>
+        <div class="card shadow-sm p-4 d-none" id="productVideoBlock">
+            <h4 class="fw-bold mb-3">🎥 Відеоогляд товару</h4>
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="video-container rounded border shadow-sm" id="videoIframeContainer"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- МОДАЛЬНІ ВІКНА -->
+    <div class="modal fade" id="cartModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title fw-bold">🛒 Ваше замовлення</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="cartItemsList" class="mb-4"></div>
+                    <div class="text-end mb-4 border-top pt-3">
+                        <span class="fs-5 text-muted">Загальна сума:</span>
+                        <span id="cartTotalDisplay" class="fs-3 fw-bold text-success">0</span> <span class="fs-4 fw-bold text-success">грн</span>
+                    </div>
+                    <form id="orderForm" onsubmit="sendOrder(event)">
+                        <h5 class="mb-3 fw-bold text-secondary">Контактні дані доставки</h5>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Ваше ім'я та прізвище</label>
+                                <input type="text" id="clientName" class="form-control" required placeholder="Іван Іванов">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Телефон</label>
+                                <input type="tel" id="clientPhone" class="form-control" required placeholder="+380XXXXXXXXX" pattern="^\+380\d{9}$">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Дані для доставки</label>
+                                <textarea id="clientDelivery" class="form-control" rows="2" required placeholder="м. Київ, Нова Пошта №15"></textarea>
+                            </div>
+                        </div>
+                        <button type="submit" id="submitOrderBtn" class="btn btn-success w-100 py-3 fw-bold mt-4 shadow-sm fs-5">Оформити замовлення</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content text-center p-4">
+                <div class="modal-body">
+                    <div class="text-success mb-3">
+                        <svg xmlns="http://w3.org" width="64" height="64" fill="currentColor" class="bi bi-check-circle-fill" viewBox="0 0 16 16">
+                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                        </svg>
+                    </div>
+                    <h4 class="fw-bold text-dark mb-2">Дякуємо за замовлення!</h4>
+                    <p class="text-muted mb-4">Менеджер отримав вашу заявку в Telegram.</p>
+                    <button type="button" class="btn btn-success px-5 fw-bold py-2" data-bs-dismiss="modal">Зрозуміло</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/bootstrap.bundle.min.js"></script>
+    <!-- <script src="assets/PhotoSwipe-master/dist/photoswipe.esm.js"></script> -->
+    <script src="router.js"></script>
+    <script src="cart.js"></script>
+
+    <script type="module">
+        // Використовуємо повний шлях до файлів. 
+        // Іноді в локальних папках краще підключати через відносний шлях.
+        import PhotoSwipeLightbox from './assets/PhotoSwipe-master/dist/photoswipe-lightbox.esm.js';
+        import PhotoSwipe from './assets/PhotoSwipe-master/dist/photoswipe.esm.js';
+
+        const lightbox = new PhotoSwipeLightbox({
+            gallery: '#productDetailContainer',
+            children: 'a.gallery-item', // Додайте клас .gallery-item
+            pswpModule: PhotoSwipe
+        });
+        
+        lightbox.init();
+        window.pswpLightbox = lightbox;
+    </script>
+</body>
+</html>
+
