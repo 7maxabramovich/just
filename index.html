@@ -176,8 +176,12 @@
 
         const lightbox = new PhotoSwipeLightbox({
             gallery: '#productDetailContainer',
-            children: 'a.gallery-item', // Додайте клас .gallery-item
-            pswpModule: PhotoSwipe
+            children: 'a.gallery-item',
+            pswpModule: PhotoSwipe,
+            // ЦІ ПАРАМЕТРИ ПРИБЕРУТЬ РОЗТЯГУВАННЯ:
+            zoom: false, // або true, якщо хочете зум
+            wheelToZoom: true,
+            bgOpacity: 0.9 // щоб було гарніше
         });
         
         lightbox.init();
@@ -185,4 +189,5 @@
     </script>
 </body>
 </html>
+
 

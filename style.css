@@ -54,3 +54,28 @@
     overflow-y: auto;
     z-index: 100;
 }
+
+/* Для великого фото */
+#mainProductImage {
+    width: 100%;
+    height: 400px; /* або будь-яка фіксована висота */
+    object-fit: contain; /* залишає фото цілим, додає порожні поля, якщо треба */
+    /* АБО використовуйте 'cover', якщо хочете щоб заповнило весь квадрат без полів */
+    background-color: #f8f9fa; /* щоб порожні поля були не білими, а світлими */
+}
+
+/* Для мініатюр */
+.thumb-img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover; /* ОБОВ'ЯЗКОВО для квадратних мініатюр */
+    border: 2px solid transparent;
+}
+
+.thumb-img.active {
+    border-color: #0d6efd; /* підсвітка активної мініатюри */
+}
+
+.pswp__img {
+    object-fit: contain !important;
+}
